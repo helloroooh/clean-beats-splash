@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "Clean Beats",
+    "slug": "clean-beats",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./public/icons/icon-512x512.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./public/icons/icon-512x512.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cleanbeats.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./public/icons/icon-512x512.png",
+        "backgroundColor": "#1a1a2e"
+      },
+      "package": "com.cleanbeats.app"
+    },
+    "web": {
+      "favicon": "./public/favicon.ico",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./public/icons/icon-96x96.png",
+          "color": "#7c3aed",
+          "sounds": []
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "clean-beats-app"
+      }
+    }
+  }
+}

@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 import UserSearch from "@/components/UserSearch";
 import { notificationService } from "@/services/notificationService";
-import { CapacitorNotificationTest } from "@/components/CapacitorNotificationTest";
+import { ExpoNotificationTest } from "@/components/ExpoNotificationTest";
 
 interface Equipment {
   id: string;
@@ -42,7 +42,16 @@ const Home = () => {
     getCurrentUser();
     fetchUnreadNotifications();
     fetchDashboardData();
-    initializeNotifications();
+    
+    // Initialize notifications with error handling
+    const initNotifications = async () => {
+      try {
+        await initializeNotifications();
+      } catch (error) {
+        console.warn('⚠️ Notifications not available in this environment:', error);
+      }
+    };
+    initNotifications();
 
     // Set up real-time subscription for notifications
     const setupRealtimeNotifications = async () => {
@@ -162,7 +171,12 @@ const Home = () => {
   }, [navigate]);
 
   const initializeNotifications = async () => {
-    await notificationService.initializePushNotifications();
+    try {
+      await notificationService.initializePushNotifications();
+    } catch (error) {
+      console.warn('⚠️ Push notifications not available:', error);
+      // Don't throw error to prevent app crashes
+    }
   };
 
   const handleTestNotification = async () => {
@@ -410,7 +424,7 @@ const Home = () => {
 
         {/* Notification Testing */}
         <div className="mb-6">
-          <CapacitorNotificationTest />
+          <ExpoNotificationTest />
         </div>
 
         {/* Shortcut Cards */}

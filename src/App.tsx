@@ -59,10 +59,6 @@ const App = () => {
       console.log('App: Initializing notifications...');
       
       try {
-        // Initialize service worker first
-        await notificationService.initializeServiceWorker();
-        console.log('App: Service worker initialized');
-        
         // Initialize push notifications setup
         await notificationService.initializePushNotifications();
         console.log('App: Push notifications initialized');
@@ -71,10 +67,10 @@ const App = () => {
         await notificationService.setupNotificationListeners();
         console.log('App: Notification listeners set up');
         
-        // Request permissions automatically on mobile (will be handled by banner)
-        // Desktop users can manually enable via settings
       } catch (error) {
         console.error('App: Error initializing notifications:', error);
+        // Don't crash the app if notifications fail to initialize
+        console.warn('⚠️ Continuing without notifications');
       }
     };
     
