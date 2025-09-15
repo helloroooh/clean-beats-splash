@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { fcmService } from '@/services/fcmService';
+import { expoNotificationService } from '@/services/expoNotificationService';
 
 export const useNotifications = () => {
   const [hasPermission, setHasPermission] = useState(false);
@@ -15,8 +15,8 @@ export const useNotifications = () => {
 
   const initializeNotifications = async () => {
     try {
-      // Initialize FCM service
-      const initialized = await fcmService.initialize();
+      // Initialize Expo notification service
+      const initialized = await expoNotificationService.initialize();
       if (initialized) {
         // Check existing permissions
         const hasPerms = await checkPermissions();
@@ -26,9 +26,9 @@ export const useNotifications = () => {
         if (hasPerms) {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
-            const token = await fcmService.getRegistrationToken();
+            const token = expoNotificationService.getToken();
             if (token) {
-              await fcmService.saveTokenToDatabase(token, user.id);
+              await expoNotificationService.saveTokenToDatabase(token, user.id);
             }
           }
         }
@@ -72,20 +72,20 @@ export const useNotifications = () => {
 
   const checkPermissions = async () => {
     try {
-      // Initialize FCM service if not already done
-      const initialized = await fcmService.initialize();
+      // Initialize Expo service if not already done
+      const initialized = await expoNotificationService.initialize();
       if (!initialized) {
         setHasPermission(false);
         return false;
       }
 
-      // Check if we can get a token (indicates permissions are granted)
-      const token = await fcmService.getRegistrationToken();
+      // Check if we have a token (indicates permissions are granted)
+      const token = expoNotificationService.getToken();
       const hasPerms = !!token;
       setHasPermission(hasPerms);
       return hasPerms;
     } catch (error) {
-      console.error('Error checking FCM permissions:', error);
+      console.error('Error checking Expo permissions:', error);
       setHasPermission(false);
       return false;
     }
@@ -93,8 +93,8 @@ export const useNotifications = () => {
 
   const requestPermissions = async () => {
     try {
-      // Initialize FCM service first
-      const initialized = await fcmService.initialize();
+      // Initialize Expo service first
+      const initialized = await expoNotificationService.initialize();
       if (!initialized) {
         toast({
           title: "Error",
@@ -105,7 +105,7 @@ export const useNotifications = () => {
       }
 
       // Request permissions
-      const permissionGranted = await fcmService.requestPermissions();
+      const permissionGranted = await expoNotificationService.requestPermissions();
       if (!permissionGranted) {
         toast({
           title: "Notifications Disabled",
@@ -116,8 +116,8 @@ export const useNotifications = () => {
         return false;
       }
 
-      // Get registration token
-      const token = await fcmService.getRegistrationToken();
+      // Get Expo push token
+      const token = expoNotificationService.getToken();
       if (!token) {
         toast({
           title: "Error",
@@ -131,7 +131,7 @@ export const useNotifications = () => {
       // Save token to database
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const tokenSaved = await fcmService.saveTokenToDatabase(token, user.id);
+        const tokenSaved = await expoNotificationService.saveTokenToDatabase(token, user.id);
         if (!tokenSaved) {
           toast({
             title: "Error",
@@ -140,9 +140,6 @@ export const useNotifications = () => {
           });
           return false;
         }
-
-        // Subscribe to cleaning reminders topic
-        await fcmService.subscribeToTopic(`user_${user.id}_cleaning_reminders`);
       }
 
       setHasPermission(true);
@@ -152,7 +149,7 @@ export const useNotifications = () => {
       });
       return true;
     } catch (error) {
-      console.error('Error requesting FCM permissions:', error);
+      console.error('Error requesting Expo permissions:', error);
       toast({
         title: "Error",
         description: "Failed to enable notifications",
@@ -177,8 +174,8 @@ export const useNotifications = () => {
         return;
       }
 
-      // Send notification via FCM edge function
-      const { error } = await supabase.functions.invoke('send-fcm-notification', {
+      // Send notification via Expo edge function
+      const { error } = await supabase.functions.invoke('send-expo-notification', {
         body: {
           userId: user.id,
           title,
@@ -219,7 +216,7 @@ export const useNotifications = () => {
       return false;
     }
 
-    return await fcmService.sendTestNotification(user.id);
+    return await expoNotificationService.sendTestNotification();
   };
 
   return {
